@@ -3,12 +3,15 @@
 		<div class="pub" @click="ispub=!ispub" v-show="ispub">发布</div>
 		<div class="content">
 			<div class="content_left">
-				<el-tree :data="data" :props="defaultProps" @node-click="handleNodeClick" @node-contextmenu = "rightClick" node-key="id" default-expand-all
-      :expand-on-click-node="false">
+				<el-tree :data="data" :props="defaultProps" @node-click="handleNodeClick" node-key="id">
 					<span class="custom-tree-node" slot-scope="{ node, data }">
-						<span>{{ node.label }}</span>
-					</span>
-
+						<span>{{data.label}}</span>
+						<span class="content_bar">
+							<i class="el-icon-edit" @click="treeEdit(node, data)"></i>
+							<i class="el-icon-plus" @click="treeAdd(data)"></i>
+							<i class="el-icon-close" @click="treeRemove(node, data)"></i>
+						</span>
+					</span>c
 				</el-tree>
 				<div class="content_createDir">
 					<el-button @click="createDirWindow">新建章节</el-button>
@@ -48,7 +51,6 @@
 					confirmButtonText: '确定',
 					cancelButtonText: '取消'
 				}).then(({ value }) => {
-					console.log(value);
 					vm.data.push({
 						id: vm.id++,
 						label: value,
@@ -58,16 +60,32 @@
 					       
 				});
 			},
-			rightClick(event,object,value,element){
-				if(value.level == 1){
-					this.menuVisible = true;
-					let menu = document.querySelector("#menu");
-					/* 菜单定位基于鼠标点击位置 */
-					menu.style.left = event.clientX + 20 + "px" ;
-					menu.style.top = event.clientY -10 + "px";
-				}
+			treeEdit(node, data){
+				const vm = this;
+				this.$prompt('添加页面', '添加', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消'
+				}).then(({ value }) => {
+					data.label = value;
+				}).catch(() => {
+					       
+				});
+			},
+			treeAdd(data){
+				const vm = this;
+				this.$prompt('添加页面', '添加', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消'
+				}).then(({ value }) => {
+					const newChild = { id: vm.id++, label: value, children: [] };
+					if (!data.children) {
+						vm.$set(data, 'children', []);
+					}
+					data.children.push(newChild);
+				}).catch(() => {
+					       
+				});
 			}
-
 		}
 	}
 </script>
@@ -91,6 +109,9 @@
 			position: relative;
 			width: 100%;
 			height: 100%;
+			.el-tree-node {
+				position: relative;
+			}
 			&_left{
 				position: absolute;
 				width: 280px;
@@ -107,6 +128,15 @@
 				right: 2px;
 				top: 0;
 				bottom: 0;
+			}
+			.el-tree-node__content:hover .content_bar {
+				display: block;
+			}
+			&_bar{
+				display: none;
+			    position: absolute;
+			    top: 0;
+			    right: 10px;
 			}
 		}
 		.view{
