@@ -3,26 +3,28 @@
 		<div class="pub" @click="ispub=!ispub" v-show="ispub">发布</div>
 		<div class="content">
 			<div class="content_left">
-				<el-tree :data="data" :props="defaultProps" @node-click="handleNodeClick" node-key="id">
+				<el-tree 
+					:data="data" 
+					:props="defaultProps" 
+					@node-click="handleNodeClick" 
+					node-key="id" 
+					default-expand-all
+					:expand-on-click-node="false"
+					>
 					<span class="custom-tree-node" slot-scope="{ node, data }">
-<<<<<<< HEAD
-						<span>{{ node.label }}</span>
-					</span>
-=======
 						<span>{{data.label}}</span>
 						<span class="content_bar">
 							<i class="el-icon-edit" @click="treeEdit(node, data)"></i>
 							<i class="el-icon-plus" @click="treeAdd(data)"></i>
 							<i class="el-icon-close" @click="treeRemove(node, data)"></i>
 						</span>
-					</span>c
->>>>>>> dcb6f4782865b585860f5559a6e4cb9ba6e5f837
+					</span>
 				</el-tree>
 				<div class="content_createDir">
 					<el-button @click="createDirWindow">新建章节</el-button>
 				</div>
 			</div>
-			<mavon-editor v-if="ispub" class="content_edit" :ishljs = "true" @change="change"></mavon-editor>
+			<mavon-editor :value="mkVaule" v-if="ispub" class="content_edit" :ishljs = "true" @change="change"></mavon-editor>
 			<div class="view markdown-body" v-html="value" v-else>
 			</div>
 		</div>
@@ -32,7 +34,8 @@
 	export default{
 		data(){
 			return{
-				value:"",
+				value:'',
+				mkVaule:'',
 				ispub:true,
 				data: [],
 				defaultProps: {
@@ -40,15 +43,18 @@
 					label: 'label'
 				},
 				id: 0,
-				menuVisible: false
+				menuVisible: false,
+				currentData: ''
 			}
 		},
 		methods:{
 			change(value, render){
 				this.value = render;
+				this.currentData.article = value;
 			},
 			handleNodeClick(data) {
-				console.log(data);
+				this.mkVaule = data.article;
+				this.currentData = data;
 			},
 			createDirWindow(){
 				const vm = this;
@@ -59,7 +65,8 @@
 					vm.data.push({
 						id: vm.id++,
 						label: value,
-						children: []
+						children: [],
+						article:''
 					});
 				}).catch(() => {
 					       
@@ -82,14 +89,22 @@
 					confirmButtonText: '确定',
 					cancelButtonText: '取消'
 				}).then(({ value }) => {
-					const newChild = { id: vm.id++, label: value, children: [] };
+					const newChild = { id: vm.id++, label: value, children: [], article:'' };
 					if (!data.children) {
 						vm.$set(data, 'children', []);
 					}
 					data.children.push(newChild);
 				}).catch(() => {
-					       
 				});
+			},
+			treeRemove(node, data){
+				const parent = node.parent;
+				try{
+					parent.removeChild(node);
+				}catch(err){
+					console.error(err);
+				}		        
+		        this.$notify({ message: '删除成功', type: 'success' });
 			}
 		}
 	}
