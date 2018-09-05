@@ -8,7 +8,6 @@
 					<span class="custom-tree-node" slot-scope="{ node, data }">
 						<span>{{ node.label }}</span>
 					</span>
-
 				</el-tree>
 				<div class="content_createDir">
 					<el-button @click="createDirWindow">新建章节</el-button>
